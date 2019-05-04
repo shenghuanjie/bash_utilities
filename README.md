@@ -1,20 +1,11 @@
 # This repository contains my bash utility functions
 
 ## `cd.sh`
-1. function `cd` with tracking history
-- To go backward "n" steps:
-```
-cd -[n]
-```
-- To go forward "n" steps:
-```
-cd [n]
-```
-- To go to a "directory":
-```
-cd [directory]
-```
-2. function `lcd` list the tracked history "n" steps before and after current directory
-```
-lcd [n]
-```
+`cd.sh` implements a `cd` function with tracking history
+
+## `savio.sh`
+`savio.sh` contains a bunch of utility functions and aliases to be used on [Savio cluster](http://research-it.berkeley.edu/services/high-performance-computing/user-guide/savio-user-guide). It also has many SLURM utility functions and aliases.
+
+
+## `df.sh`
+`df.sh` contains a bunch of utility functions to work with tab-delimited files (data frame) in bash.
