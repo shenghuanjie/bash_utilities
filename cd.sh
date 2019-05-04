@@ -115,3 +115,25 @@ function lcd
         (paste <(echo "$line_numbers")  <(echo "$filenames") --delimiters '\t') | grep "^.*\s$" -A $CD_HISTORY_LENGTH -B $CD_HISTORY_LENGTH
     fi
 }
+
+# fast advance to a directory containing a pattern
+# ironically, it's actually pretty slow!
+function fcd
+{
+    if [[ $# -ge 1 ]]; then
+        if [[ $1 == */* ]]; then
+            cd "$(find . -path '*$1' -print -quit)"
+        else
+            cd "$(find . -type d -name $1 -print -quit)"
+        fi
+    fi
+}
+
+# go up (cd .. multiple times)
+function up
+{
+    for i in $(seq 1 $1)
+    do
+        cd ..
+    done
+}
