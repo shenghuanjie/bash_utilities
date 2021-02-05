@@ -2,12 +2,13 @@
 
 BACK_CD_HISTORY=""
 FORWARD_CD_HISTORY=""
-KEEP_CD_HISTORY=100
+KEEP_CD_HISTORY=10
+OFFSET_CD_HISTORY=0
 
-# cd with tracking history
-# cd 1 to move forward
-# cd -1 to move backward
-# cd [directory] to move to a path
+# override the builtin cd function so it can trace back history
+# use cd n to move forwards
+# use cd -n to move backwards
+# use lcd to list stored history
 function cd {
     local DIR="."
     local BACK_HISTORY=$BACK_CD_HISTORY
@@ -35,16 +36,17 @@ function cd {
                         builtin cd "$DIR"
                     fi
                 fi
+                OFFSET_CD_HISTORY=$(( $OFFSET_CD_HISTORY - $1 ))
             fi
         elif [[ $1 -lt 0 ]]; then
-            if [[ $(( -$1 )) -gt $BACK_HISTORY_LENGTH ]]; then
+            if [[ $(( -1 * $1 )) -gt $BACK_HISTORY_LENGTH ]]; then
                 echo "Not enough backward history in the cache. Try 'lcd' to see the cache."
             else
                 if [[ $FORWARD_HISTORY_LENGTH -eq 0 ]]; then
                     DIR=$PWD
                     FORWARD_HISTORY=$DIR:$FORWARD_HISTORY
                 fi
-                for iDir in $(seq 1 $(( -$1 ))); do
+                for iDir in $(seq 1 $(( -1 * $1 ))); do
                     DIR=${BACK_HISTORY%%:*}
                     BACK_HISTORY=${BACK_HISTORY#*:}
                     FORWARD_HISTORY=$DIR:$FORWARD_HISTORY
@@ -54,6 +56,7 @@ function cd {
                     FORWARD_CD_HISTORY=$FORWARD_HISTORY
                     builtin cd "$DIR"
                 fi
+                OFFSET_CD_HISTORY=$(( $OFFSET_CD_HISTORY - $1 ))
             fi
         else
             echo "Stay right here."
@@ -61,14 +64,24 @@ function cd {
     else
         if [[ $KEEP_CD_HISTORY -gt 0 ]]; then
             BACK_CD_HISTORY=$PWD:$BACK_CD_HISTORY
-            KEEP_CD_HISTORY=$(( $KEEP_CD_HISTORY - 1 ))
         else
             BACK_CD_HISTORY=$PWD:${BACK_CD_HISTORY%:*}
         fi
+
+        if [[ $OFFSET_CD_HISTORY -eq 0 ]]; then
+            if [[ $KEEP_CD_HISTORY -gt 0 ]]; then
+                KEEP_CD_HISTORY=$(( $KEEP_CD_HISTORY - 1 ))
+            fi
+        else
+            KEEP_CD_HISTORY=$(( $KEEP_CD_HISTORY + $OFFSET_CD_HISTORY ))
+        fi
+
+        OFFSET_CD_HISTORY=0
         FORWARD_CD_HISTORY=""
         builtin cd "$@"
     fi
 }
+
 
 #
 function checkcd
